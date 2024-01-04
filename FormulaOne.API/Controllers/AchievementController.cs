@@ -1,31 +1,24 @@
-﻿using AutoMapper;
-using FormulaOne.DataService.Repositories.Interfaces;
-using FormulaOne.Entities.DbSet;
+﻿using FormulaOne.API.Commands;
+using FormulaOne.API.Queries;
 using FormulaOne.Entities.DTOs.Requests;
-using FormulaOne.Entities.DTOs.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FormulaOne.API.Controllers
 {
     public class AchievementController : BaseController
     {
-        public AchievementController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        public AchievementController(IMediator mediator) : base(mediator)
         { }
 
         [HttpGet]
         [Route("{driverId:guid}")]
         public async Task<IActionResult> GetDriverAchievements(Guid driverId)
         {
-            var driverAchievements = await _unitOfWork.Achievements.GetDriverAchievementAsync(driverId);
+            var query = new GetDriverAchievementsQuery(driverId);
+            var result = await _mediator.Send(query);
 
-            if (driverAchievements == null)
-            {
-                return NotFound("Achievements not found");
-            }
-
-            var result = _mapper.Map<DriverAchievementResponse>(driverAchievements);
-
-            return Ok(result);
+            return result != null ? Ok(result) : NotFound();
         }
 
         [HttpPost("")]
@@ -36,10 +29,8 @@ namespace FormulaOne.API.Controllers
                 return BadRequest();
             }
 
-            var result = _mapper.Map<Achievement>(achievement);
-
-            await _unitOfWork.Achievements.AddAsync(result);
-            await _unitOfWork.CompleteAsync();
+            var command = new CreateAchievementCommand(achievement);
+            var result = await _mediator.Send(command);
 
             return CreatedAtAction(nameof(GetDriverAchievements), new { driverId = result.DriverId }, result);
         }
@@ -52,12 +43,20 @@ namespace FormulaOne.API.Controllers
                 return BadRequest();
             }
 
-            var result = _mapper.Map<Achievement>(achievement);
+            var command = new UpdateAchievementCommand(achievement);
+            var result = await _mediator.Send(command);
 
-            await _unitOfWork.Achievements.UpdateAsync(result);
-            await _unitOfWork.CompleteAsync();
+            return result ? NoContent() : BadRequest();
+        }
 
-            return NoContent();
+        [HttpDelete]
+        [Route("{achieveId:guid}")]
+        public async Task<IActionResult> DeleteAchievement(Guid achieveId)
+        {
+            var command = new DeleteAchievementCommand(achieveId);
+            var result = await _mediator.Send(command);
+
+            return result ? NoContent() : BadRequest();
         }
     }
 }

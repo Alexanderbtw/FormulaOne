@@ -2,6 +2,7 @@
 {
     public class DriverAchievementResponse
     {
+        public Guid AchievementId { get; set; }
         public Guid DriverId { get; set; }
         public int WorldChampionship { get; set; }
         public int FastestLap { get; set; }

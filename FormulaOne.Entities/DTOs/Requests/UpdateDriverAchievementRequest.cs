@@ -2,7 +2,7 @@
 {
     public class UpdateDriverAchievementRequest
     {
-        public Guid DriverId { get; set; }
+        public Guid AchievementId { get; set; }
         public int WorldChampionship { get; set; }
         public int FastestLap { get; set; }
         public int PolePositions { get; set; }

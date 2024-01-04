@@ -1,13 +1,14 @@
 ﻿using FormulaOne.DataService.Data;
 using FormulaOne.DataService.Repositories.Interfaces;
+using FormulaOne.Entities.DbSet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FormulaOne.DataService.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
-        public readonly ILogger _logger;
+        protected readonly ILogger _logger;
         protected AppDbContext _context;
         internal DbSet<T> _dbSet;
 
@@ -19,9 +20,21 @@ namespace FormulaOne.DataService.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public virtual Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _dbSet.Where(d => d.Status == 1)
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .OrderBy(d => d.AddedDate)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllAsync function error");
+                throw;
+            }
         }
 
         public virtual async Task<T?> GetAsync(Guid id)
@@ -35,9 +48,25 @@ namespace FormulaOne.DataService.Repositories
             return true;
         }
 
-        public virtual Task<bool> DeleteAsync(Guid id)
+        public virtual async Task<bool> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _dbSet.FirstOrDefaultAsync(d => d.Id == id);
+
+                if (result == null)
+                    return false;
+
+                result.Status = 0;
+                result.UpdatedDate = DateTime.UtcNow;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteAsync function error");
+                throw;
+            }
         }
 
         public virtual Task<bool> UpdateAsync(T entity)

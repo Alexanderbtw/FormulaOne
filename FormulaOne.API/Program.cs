@@ -24,6 +24,8 @@ namespace FormulaOne.API
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly));
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("TestPolicy", policyBuilder =>

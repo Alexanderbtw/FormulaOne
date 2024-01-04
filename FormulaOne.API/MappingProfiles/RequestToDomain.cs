@@ -28,6 +28,10 @@ namespace FormulaOne.API.MappingProfiles
 
             CreateMap<UpdateDriverAchievementRequest, Achievement>()
                 .ForMember(
+                    dest => dest.Id,
+                    opt => opt.MapFrom(src => src.AchievementId)
+                )
+                .ForMember(
                     dest => dest.RaceWins,
                     opt => opt.MapFrom(src => src.Wins)
                 )
@@ -51,6 +55,10 @@ namespace FormulaOne.API.MappingProfiles
                 );
 
             CreateMap<UpdateDriverRequest, Driver>()
+                .ForMember(
+                    dest => dest.Id,
+                    opt => opt.MapFrom(src => src.DriverId)
+                )
                 .ForMember(
                     dest => dest.UpdatedDate,
                     opt => opt.MapFrom(src => DateTime.UtcNow)

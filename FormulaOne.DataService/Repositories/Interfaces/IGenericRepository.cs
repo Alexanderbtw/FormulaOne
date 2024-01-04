@@ -1,4 +1,6 @@
-﻿namespace FormulaOne.DataService.Repositories.Interfaces
+﻿using FormulaOne.Entities.DbSet;
+
+namespace FormulaOne.DataService.Repositories.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {

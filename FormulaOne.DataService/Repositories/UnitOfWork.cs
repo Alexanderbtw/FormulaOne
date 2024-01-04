@@ -14,10 +14,9 @@ namespace FormulaOne.DataService.Repositories
         public UnitOfWork(AppDbContext context, ILoggerFactory loggerFactory)
         {
             _context = context;
-            var logger = loggerFactory.CreateLogger("logs");
 
-            Drivers = new DriverRepository(_context, logger);
-            Achievements = new AchievementRepository(_context, logger);
+            Drivers = new DriverRepository(_context, loggerFactory.CreateLogger<DriverRepository>());
+            Achievements = new AchievementRepository(_context, loggerFactory.CreateLogger<AchievementRepository>());
         }
 
         public async Task<bool> CompleteAsync()
@@ -26,7 +25,7 @@ namespace FormulaOne.DataService.Repositories
             return res > 0;
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             _context.Dispose();
         }

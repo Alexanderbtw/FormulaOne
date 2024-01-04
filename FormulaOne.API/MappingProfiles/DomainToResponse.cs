@@ -12,6 +12,10 @@ namespace FormulaOne.API.MappingProfiles
                 .ForMember(
                     dest => dest.Wins,
                     opt => opt.MapFrom(src => src.RaceWins)
+                )
+                .ForMember(
+                    dest => dest.AchievementId,
+                    opt => opt.MapFrom(src => src.Id)
                 );
 
             CreateMap<Driver, GetDriverResponse>()
