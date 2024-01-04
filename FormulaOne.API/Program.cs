@@ -24,6 +24,17 @@ namespace FormulaOne.API
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("TestPolicy", policyBuilder =>
+                {
+                    policyBuilder.WithOrigins("http://localhost:5000");
+                    policyBuilder.AllowAnyHeader();
+                    policyBuilder.AllowAnyMethod();
+                    policyBuilder.AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -37,8 +48,9 @@ namespace FormulaOne.API
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+
+            app.UseCors("TestPolicy");
 
             app.Run();
         }

@@ -13,7 +13,7 @@ namespace FormulaOne.API.Controllers
         { }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(Guid driverId)
+        public async Task<IActionResult> GetAll()
         {
             var drivers = await _unitOfWork.Drivers.GetAllAsync();
 
