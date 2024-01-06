@@ -2,6 +2,9 @@
 using FormulaOne.DataService.Data;
 using FormulaOne.DataService.Repositories;
 using FormulaOne.DataService.Repositories.Interfaces;
+using FormulaOne.Services;
+using FormulaOne.Services.Interfaces;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace FormulaOne.API
@@ -24,7 +27,20 @@ namespace FormulaOne.API
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            builder.Services.AddScoped<IDriverNotificationPublisherService, DriverNotificationPublisherService>();
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly));
+
+            builder.Services.AddMassTransit(conf =>
+            {
+                conf.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
+                    {
+                        h.Username(builder.Configuration["RabbitMQ:Username"]);
+                        h.Password(builder.Configuration["RabbitMQ:Password"]);
+                    });
+                });
+            });
 
             builder.Services.AddCors(options =>
             {

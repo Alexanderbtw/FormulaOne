@@ -3,6 +3,7 @@ using FormulaOne.API.Commands;
 using FormulaOne.DataService.Repositories.Interfaces;
 using FormulaOne.Entities.DbSet;
 using FormulaOne.Entities.DTOs.Responses;
+using FormulaOne.Services.Interfaces;
 using MediatR;
 
 namespace FormulaOne.API.Handlers
@@ -11,11 +12,13 @@ namespace FormulaOne.API.Handlers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IDriverNotificationPublisherService _notificationService;
 
-        public CreateDriverHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateDriverHandler(IUnitOfWork unitOfWork, IMapper mapper, IDriverNotificationPublisherService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<GetDriverResponse> Handle(CreateDriverCommand request, CancellationToken cancellationToken)
@@ -25,7 +28,10 @@ namespace FormulaOne.API.Handlers
             await _unitOfWork.Drivers.AddAsync(driver);
             await _unitOfWork.CompleteAsync();
 
-            return _mapper.Map<GetDriverResponse>(driver);
+            var response = _mapper.Map<GetDriverResponse>(driver);
+            
+            await _notificationService.SentNotification(response.DriverId, response.FullName);
+            return response;
         }
     }
 }
